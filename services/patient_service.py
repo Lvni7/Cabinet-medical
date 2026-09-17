@@ -1,5 +1,5 @@
-﻿from utils.validators import PatientNotFoundError
-from utils.validators import DuplicatePatientError
+﻿from utils.exceptions import PatientNotFoundError
+from utils.exceptions import DuplicatePatientError
 
 patients = []
 

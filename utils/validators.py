@@ -1,14 +1,11 @@
-﻿class PatientNotFoundError(Exception):
-    pass
+﻿from utils.exceptions import InvalidSecurityNumberError
 
-class ConsultationNotFoundError(Exception):
-    pass
+def verify_ssn(self, ssn):
 
-class InvalidSecurityNumberError(Exception):
-    pass
+    if len(ssn) != 15:
+        raise InvalidSecurityNumberError("Le numéro de sécurité sociale doit contenir 15 chiffres")
+    
+    if not ssn.isdigit():
+        raise InvalidSecurityNumberError("Le numéro de sécurité sociale ne doit contenir que des chiffres")
 
-class InvalidConsultationStatusError(Exception):
-    pass
-
-class DuplicatePatientError(Exception):
-    pass
+    return ssn
