@@ -11,7 +11,9 @@ Répartition proposée
 Personne A — Côté "Patient"
 
 models/patient.py : classe Patient (encapsulation, validation NSS 15 chiffres, calcul de l'âge)
+
 services/patient_service.py : ajout, recherche, liste, historique
+
 utils/validators.py : validation du NSS et autres champs patient
 Exceptions : PatientNotFoundError, InvalidSecurityNumberError
 Décorateur @validate_patient
