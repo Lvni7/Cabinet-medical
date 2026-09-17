@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+﻿
+=======
 ﻿from models.consultation import Consultation
 class ConsultationService:
     def __init__(self):
