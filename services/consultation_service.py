@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-﻿
-=======
-﻿from models.consultation import Consultation
+from models.consultation import Consultation
 class ConsultationService:
     def __init__(self):
         self.__consultations = []
