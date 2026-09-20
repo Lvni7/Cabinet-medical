@@ -6,7 +6,6 @@ from utils.exceptions import ConsultationNotFoundError
 
 
 class ConsultationService:
-    """Gère les consultations enregistrées dans le cabinet."""
 
     def __init__(self):
         """Initialise une liste vide de consultations."""

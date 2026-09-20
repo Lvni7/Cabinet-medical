@@ -138,7 +138,10 @@ def load_data(consultation_service, file_path=DATA_FILE):
 		return
 
 	with open(file_path, "r") as data_file:
-		saved_data = json.load(data_file)
+		try:
+			saved_data = json.load(data_file)
+		except json.JSONDecodeError:
+			saved_data = {}
 
 	patient_service.patients.clear()
 	for patient_data in saved_data.get("patients", []):
