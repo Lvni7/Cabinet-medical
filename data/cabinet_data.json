@@ -1,2 +1,13 @@
-﻿{}
-
+{
+    "patients": [
+        {
+            "social_security_number": "111111111111111",
+            "last_name": "Me",
+            "first_name": "L",
+            "birth_date": "24-02-2008",
+            "address": "Test",
+            "phone_number": "078894940799"
+        }
+    ],
+    "consultations": []
+}

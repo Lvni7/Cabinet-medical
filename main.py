@@ -11,6 +11,8 @@ from models.prescription import (
 )
 from services import patient_service
 from services.consultation_service import ConsultationService
+from utils.exceptions import DuplicatePatientError, InvalidSecurityNumberError
+from utils.validators import verify_ssn
 
 
 DATA_FILE = os.path.join("data", "cabinet_data.json")
@@ -186,6 +188,44 @@ def display_patients():
 		)
 
 
+def read_patient():
+	"""
+		Demande les informations d'un patient en répétant les saisies invalides.
+
+		Returns:
+			Patient: Patient construit avec des informations valides.
+	"""
+	while True:
+		social_security_number = input("Numéro de sécurité sociale : ")
+		try:
+			verify_ssn(social_security_number)
+			break
+		except InvalidSecurityNumberError as error:
+			print(f"Erreur : {error}")
+
+	last_name = input("Nom : ")
+	first_name = input("Prénom : ")
+
+	while True:
+		birth_date = input("Date de naissance (JJ-MM-AAAA) : ")
+		try:
+			datetime.strptime(birth_date, "%d-%m-%Y")
+			break
+		except ValueError:
+			print("Erreur : la date doit respecter le format JJ-MM-AAAA.")
+
+	address = input("Adresse : ")
+	phone_number = input("Téléphone : ")
+	return Patient(
+		social_security_number,
+		last_name,
+		first_name,
+		birth_date,
+		address,
+		phone_number,
+	)
+
+
 def run_application():
 	"""Lance le menu console principal et sauvegarde après chaque modification."""
 	consultation_service = ConsultationService()
@@ -204,17 +244,14 @@ def run_application():
 		choice = input("Choix : ")
 
 		if choice == "1":
-			patient = Patient(
-				input("Numéro de sécurité sociale : "),
-				input("Nom : "),
-				input("Prénom : "),
-				input("Date de naissance (JJ-MM-AAAA) : "),
-				input("Adresse : "),
-				input("Téléphone : "),
-			)
-			patient_service.add_patient(patient)
-			save_data(consultation_service)
-			print("Patient ajouté.")
+			try:
+				patient = read_patient()
+				patient_service.add_patient(patient)
+			except DuplicatePatientError as error:
+				print(f"Erreur : {error}")
+			else:
+				save_data(consultation_service)
+				print("Patient ajouté.")
 		elif choice == "2":
 			display_patients()
 		elif choice == "3":
