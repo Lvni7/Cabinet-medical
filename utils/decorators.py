@@ -15,7 +15,6 @@ def validate_patient(function):
 
 	@wraps(function)
 	def wrapper(social_security_number, *args, **kwargs):
-		"""Recherche le patient puis appelle la fonction d'origine."""
 		from services.patient_service import find_patient
 
 		find_patient(social_security_number)
@@ -37,7 +36,6 @@ def log_action(function):
 
 	@wraps(function)
 	def wrapper(*args, **kwargs):
-		"""Exécute la fonction puis écrit son nom et sa date dans le journal."""
 		result = function(*args, **kwargs)
 		with open("logs.txt", "a") as log_file:
 			timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")

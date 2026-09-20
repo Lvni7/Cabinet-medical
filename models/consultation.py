@@ -17,37 +17,30 @@ class Consultation:
 
     @property
     def appointment_datetime(self):
-        """Retourne la date et l'heure du rendez-vous."""
         return self.__appointment_datetime
 
     @property
     def patient(self):
-        """Retourne le patient concerné."""
         return self.__patient
 
     @property
     def doctor(self):
-        """Retourne le nom du médecin."""
         return self.__doctor
 
     @property
     def reason(self):
-        """Retourne le motif de consultation."""
         return self.__reason
 
     @property
     def diagnosis(self):
-        """Retourne le diagnostic, éventuellement vide."""
         return self.__diagnosis
 
     @property
     def prescriptions(self):
-        """Retourne les prescriptions associées."""
         return self.__prescriptions
 
     @property
     def status(self):
-        """Retourne le statut de la consultation."""
         return self.__status
 
     def add_diagnosis(self, diagnosis):

@@ -8,16 +8,13 @@ from utils.exceptions import ConsultationNotFoundError
 class ConsultationService:
 
     def __init__(self):
-        """Initialise une liste vide de consultations."""
         self.__consultations = []
 
     @log_action
     def add_consultation(self, consultation):
-        """Enregistre une consultation dans le service."""
         self.__consultations.append(consultation)
 
     def get_consultations(self, patient):
-        """Retourne les consultations associées à un patient."""
         return [consultation for consultation in self.__consultations if consultation.patient == patient]
 
     @log_action
@@ -89,30 +86,25 @@ class ConsultationService:
             raise ConsultationNotFoundError("Consultation introuvable")
 
     def list_all_consultations(self):
-        """Retourne toutes les consultations du service."""
         return self.__consultations
 
     @log_action
     def mark_consultation_as_completed(self, consultation_index):
-        """Marque une consultation existante comme réalisée."""
         consultation = self.find_consultation(consultation_index)
         consultation.mark_as_completed()
 
     @log_action
     def cancel_consultation(self, consultation_index):
-        """Annule une consultation existante."""
         consultation = self.find_consultation(consultation_index)
         consultation.cancel()
 
     @log_action
     def add_diagnosis(self, consultation_index, diagnosis):
-        """Ajoute un diagnostic à une consultation réalisée."""
         consultation = self.find_consultation(consultation_index)
         consultation.add_diagnosis(diagnosis)
 
     @log_action
     def add_prescription(self, consultation_index, prescription):
-        """Ajoute une prescription à une consultation non annulée."""
         consultation = self.find_consultation(consultation_index)
         consultation.add_prescription(prescription)
     

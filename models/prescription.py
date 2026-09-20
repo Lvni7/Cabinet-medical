@@ -9,17 +9,14 @@ class Prescription:
 
     @property
     def treatment_name(self):
-        """Retourne le nom du traitement."""
         return self._treatment_name
 
     @property
     def dosage(self):
-        """Retourne le dosage ou les informations de posologie."""
         return self._dosage
 
     @property
     def duration(self):
-        """Retourne la durée du traitement."""
         return self._duration
 
     def afficher_details(self):
@@ -38,12 +35,10 @@ class PrescriptionMedicamenteuse(Prescription):
 
     @property
     def medication_name(self):
-        """Retourne le nom du médicament."""
         return self._medication_name
 
     @property
     def frequency(self):
-        """Retourne la fréquence de prise."""
         return self._frequency
 
     def afficher_details(self):
@@ -67,12 +62,10 @@ class PrescriptionExamen(Prescription):
 
     @property
     def exam_type(self):
-        """Retourne le type d'examen."""
         return self._exam_type
 
     @property
     def recommended_laboratory(self):
-        """Retourne le laboratoire recommandé."""
         return self._recommended_laboratory
 
     def afficher_details(self):
@@ -95,12 +88,10 @@ class PrescriptionKinesitherapie(Prescription):
 
     @property
     def session_count(self):
-        """Retourne le nombre de séances."""
         return self._session_count
 
     @property
     def area_to_treat(self):
-        """Retourne la zone à traiter."""
         return self._area_to_treat
 
     def afficher_details(self):
