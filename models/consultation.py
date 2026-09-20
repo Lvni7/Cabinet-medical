@@ -1,59 +1,87 @@
-﻿class Consultation:
-    def __init__(self, appointment_datetime, patient, doctor, reason):
+from utils.exceptions import InvalidConsultationStatusError
+
+
+class Consultation:
+    """Représente un rendez-vous médical et son suivi."""
+
+    def __init__(self, appointment_datetime, patient, doctor, reason,
+                 diagnosis="", prescriptions=None, status="planifiée"):
+        """Initialise une consultation planifiée par défaut."""
         self.__appointment_datetime = appointment_datetime
         self.__patient = patient
         self.__doctor = doctor
         self.__reason = reason
-        self.__diagnosis = ""
-        self.__prescriptions = []
-        self.__status = "planifiée"
+        self.__diagnosis = diagnosis
+        self.__prescriptions = prescriptions if prescriptions is not None else []
+        self.__status = status
 
     @property
     def appointment_datetime(self):
+        """Retourne la date et l'heure du rendez-vous."""
         return self.__appointment_datetime
 
     @property
     def patient(self):
+        """Retourne le patient concerné."""
         return self.__patient
 
     @property
     def doctor(self):
+        """Retourne le nom du médecin."""
         return self.__doctor
 
     @property
     def reason(self):
+        """Retourne le motif de consultation."""
         return self.__reason
 
     @property
     def diagnosis(self):
+        """Retourne le diagnostic, éventuellement vide."""
         return self.__diagnosis
 
     @property
     def prescriptions(self):
+        """Retourne les prescriptions associées."""
         return self.__prescriptions
 
     @property
     def status(self):
+        """Retourne le statut de la consultation."""
         return self.__status
 
     def add_diagnosis(self, diagnosis):
+        """Ajoute un diagnostic uniquement après la réalisation du rendez-vous."""
         if self.__status != "réalisée":
-            raise ValueError("Le diagnostic ne peut être ajouté que pour une consultation réalisée.")
+            raise InvalidConsultationStatusError(
+                "Le diagnostic ne peut être ajouté que pour une consultation réalisée."
+            )
         self.__diagnosis = diagnosis
 
     def add_prescription(self, prescription):
+        """Ajoute une prescription si la consultation n'est pas annulée."""
         if self.__status == "annulée":
-            raise ValueError("Impossible d'ajouter une prescription à une consultation annulée.")
+            raise InvalidConsultationStatusError(
+                "Impossible d'ajouter une prescription à une consultation annulée."
+            )
         self.__prescriptions.append(prescription)
 
     def mark_as_completed(self):
+        """Marque la consultation comme réalisée si elle peut encore évoluer."""
         if self.__status == "annulée":
-            raise ValueError("Une consultation annulée ne peut pas être réalisée.")
+            raise InvalidConsultationStatusError(
+                "Une consultation annulée ne peut pas être réalisée."
+            )
         elif self.__status == "réalisée":
-            raise ValueError("La consultation est déjà marquée comme réalisée.")
+            raise InvalidConsultationStatusError(
+                "La consultation est déjà marquée comme réalisée."
+            )
         self.__status = "réalisée"
 
     def cancel(self):
+        """Annule une consultation qui n'a pas encore été réalisée."""
         if self.__status == "réalisée":
-            raise ValueError("Une consultation déjà réalisée ne peut pas être annulée.")
+            raise InvalidConsultationStatusError(
+                "Une consultation déjà réalisée ne peut pas être annulée."
+            )
         self.__status = "annulée"
