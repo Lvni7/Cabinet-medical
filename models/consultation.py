@@ -4,9 +4,10 @@ from utils.exceptions import InvalidConsultationStatusError
 class Consultation:
     """Représente un rendez-vous médical et son suivi."""
 
-    def __init__(self, appointment_datetime, patient, doctor, reason,
+    def __init__(self, consultation_number, appointment_datetime, patient, doctor, reason,
                  diagnosis="", prescriptions=None, status="planifiée"):
         """Initialise une consultation planifiée par défaut."""
+        self.__consultation_number = consultation_number
         self.__appointment_datetime = appointment_datetime
         self.__patient = patient
         self.__doctor = doctor
@@ -14,6 +15,11 @@ class Consultation:
         self.__diagnosis = diagnosis
         self.__prescriptions = prescriptions if prescriptions is not None else []
         self.__status = status
+
+    @property
+    def consultation_number(self):
+        """Retourne le numéro unique de la consultation."""
+        return self.__consultation_number
 
     @property
     def appointment_datetime(self):

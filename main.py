@@ -35,6 +35,7 @@ def consultation_to_dictionary(consultation):
 		dict: Données simples de la consultation.
 	"""
 	return {
+		"consultation_number": consultation.consultation_number,
 		"appointment_datetime": consultation.appointment_datetime.strftime("%d-%m-%Y %H:%M"),
 		"patient_social_security_number": consultation.patient.social_security_number,
 		"doctor": consultation.doctor,
@@ -162,7 +163,10 @@ def load_data(consultation_service, file_path=DATA_FILE):
 			patient_data["phone_number"],
 		))
 
-	for consultation_data in saved_data.get("consultations", []):
+	for consultation_index, consultation_data in enumerate(
+		saved_data.get("consultations", []),
+		start=1,
+	):
 		patient = patient_service.find_patient(
 			consultation_data["patient_social_security_number"]
 		)
@@ -170,6 +174,7 @@ def load_data(consultation_service, file_path=DATA_FILE):
 			consultation_data["appointment_datetime"], "%d-%m-%Y %H:%M"
 		)
 		consultation = Consultation(
+			consultation_data.get("consultation_number", consultation_index),
 			appointment_datetime,
 			patient,
 			consultation_data["doctor"],
@@ -192,6 +197,56 @@ def display_patients():
 			f"{patient.social_security_number} - "
 			f"{patient.first_name} {patient.last_name} - {patient.age} ans"
 		)
+
+
+def display_prescriptions(prescriptions):
+	"""Affiche les détails des prescriptions d'une consultation."""
+	if not prescriptions:
+		print("Prescriptions : aucune")
+		return
+
+	print("Prescriptions :")
+	for prescription in prescriptions:
+		print(prescription.afficher_details())
+
+
+def display_consultation(consultation):
+	"""Affiche toutes les informations importantes d'une consultation."""
+	print(f"Numéro : {consultation.consultation_number}")
+	print(
+		f"Patient : {consultation.patient.first_name} "
+		f"{consultation.patient.last_name}"
+	)
+	print(f"Date et heure : {consultation.appointment_datetime}")
+	print(f"Médecin : {consultation.doctor}")
+	print(f"Motif : {consultation.reason}")
+	print(f"Statut : {consultation.status}")
+	print(f"Diagnostic : {consultation.diagnosis or 'aucun'}")
+	display_prescriptions(consultation.prescriptions)
+	print()
+
+
+def display_all_consultations(consultation_service):
+	"""Affiche les consultations planifiées, réalisées et annulées."""
+	consultations = consultation_service.list_all_consultations()
+	if not consultations:
+		print("Aucune consultation enregistrée.")
+		return
+
+	for consultation in consultations:
+		display_consultation(consultation)
+
+
+def display_patient_consultations(consultation_service):
+	"""Recherche un patient puis affiche tout son historique de consultations."""
+	patient = read_existing_patient()
+	consultations = consultation_service.get_consultations_by_patient(patient)
+	if not consultations:
+		print("Ce patient n'a aucune consultation.")
+		return
+
+	for consultation in consultations:
+		display_consultation(consultation)
 
 
 def read_patient():
@@ -257,28 +312,83 @@ def read_appointment_datetime():
 			print("Erreur : la date doit respecter le format JJ-MM-AAAA HH:MM.")
 
 
-def read_consultation_index(consultation_service):
+def read_consultation_number(consultation_service):
 	"""
-		Demande le numéro d'une consultation existante.
+		Demande le numéro unique d'une consultation existante.
 
 		Args:
 			consultation_service (ConsultationService): Service des consultations.
 
 		Returns:
-			int: Position valide d'une consultation.
+			int: Numéro valide d'une consultation.
 	"""
 	while True:
 		try:
-			consultation_index = int(input("Numéro de consultation : "))
-			if consultation_index < 0:
+			consultation_number = int(input("Numéro de consultation : "))
+			if consultation_number < 1:
 				raise ConsultationNotFoundError("Consultation introuvable")
-			consultation_service.find_consultation(consultation_index)
-			return consultation_index
+			consultation_service.find_consultation(consultation_number)
+			return consultation_number
 		except (ValueError, ConsultationNotFoundError) as error:
 			if isinstance(error, ValueError):
 				print("Erreur : saisissez un numéro entier.")
 			else:
 				print(f"Erreur : {error}")
+
+
+def read_prescription(prescription_type):
+	"""
+		Construit une prescription selon le type choisi par l'utilisateur.
+
+		Args:
+			prescription_type (str): Choix 1, 2 ou 3 du type de prescription.
+
+		Returns:
+			Prescription: Prescription créée avec les informations saisies.
+	"""
+	while prescription_type not in ("1", "2", "3"):
+		print("Erreur : choisissez 1, 2 ou 3.")
+		prescription_type = input(
+			"Type (1 médicament, 2 examen, 3 kinésithérapie) : "
+		)
+
+	treatment_name = input("Traitement : ")
+	dosage = input("Dosage : ")
+	duration = input("Durée : ")
+
+	if prescription_type == "1":
+		return PrescriptionMedicamenteuse(
+			treatment_name,
+			dosage,
+			duration,
+			input("Médicament : "),
+			input("Fréquence : "),
+		)
+	if prescription_type == "2":
+		return PrescriptionExamen(
+			treatment_name,
+			dosage,
+			duration,
+			input("Type d'examen : "),
+			input("Laboratoire recommandé : "),
+		)
+
+	while True:
+		try:
+			session_count = int(input("Nombre de séances : "))
+			if session_count < 1:
+				raise ValueError
+			break
+		except ValueError:
+			print("Erreur : saisissez un nombre de séances positif.")
+
+	return PrescriptionKinesitherapie(
+		treatment_name,
+		dosage,
+		duration,
+		session_count,
+		input("Zone à traiter : "),
+	)
 
 
 def run_application():
@@ -290,12 +400,13 @@ def run_application():
 		print("\n1. Ajouter un patient")
 		print("2. Lister les patients")
 		print("3. Planifier une consultation")
-		print("4. Afficher les consultations à venir")
+		print("4. Afficher toutes les consultations")
 		print("5. Marquer une consultation comme réalisée")
 		print("6. Annuler une consultation")
 		print("7. Ajouter un diagnostic")
-		print("8. Ajouter une prescription médicamenteuse")
-		print("9. Quitter")
+		print("8. Ajouter une prescription")
+		print("9. Afficher les consultations d'un patient")
+		print("10. Quitter")
 		choice = input("Choix : ")
 
 		if choice == "1":
@@ -327,17 +438,11 @@ def run_application():
 				save_data(consultation_service)
 				print("Consultation planifiée.")
 		elif choice == "4":
-			for consultation in consultation_service.get_upcoming_consultations():
-				print(
-					consultation.appointment_datetime,
-					consultation.patient.first_name,
-					consultation.patient.last_name,
-					consultation.reason,
-				)
+			display_all_consultations(consultation_service)
 		elif choice == "5":
 			try:
-				consultation_index = read_consultation_index(consultation_service)
-				consultation_service.mark_consultation_as_completed(consultation_index)
+				consultation_number = read_consultation_number(consultation_service)
+				consultation_service.mark_consultation_as_completed(consultation_number)
 			except InvalidConsultationStatusError as error:
 				print(f"Erreur : {error}")
 			else:
@@ -345,8 +450,8 @@ def run_application():
 				print("Consultation réalisée.")
 		elif choice == "6":
 			try:
-				consultation_index = read_consultation_index(consultation_service)
-				consultation_service.cancel_consultation(consultation_index)
+				consultation_number = read_consultation_number(consultation_service)
+				consultation_service.cancel_consultation(consultation_number)
 			except InvalidConsultationStatusError as error:
 				print(f"Erreur : {error}")
 			else:
@@ -354,9 +459,9 @@ def run_application():
 				print("Consultation annulée.")
 		elif choice == "7":
 			try:
-				consultation_index = read_consultation_index(consultation_service)
+				consultation_number = read_consultation_number(consultation_service)
 				consultation_service.add_diagnosis(
-					consultation_index,
+					consultation_number,
 					input("Diagnostic : "),
 				)
 			except InvalidConsultationStatusError as error:
@@ -366,21 +471,20 @@ def run_application():
 				print("Diagnostic ajouté.")
 		elif choice == "8":
 			try:
-				consultation_index = read_consultation_index(consultation_service)
-				prescription = PrescriptionMedicamenteuse(
-					input("Traitement : "),
-					input("Dosage : "),
-					input("Durée : "),
-					input("Médicament : "),
-					input("Fréquence : "),
+				consultation_number = read_consultation_number(consultation_service)
+				prescription_type = input(
+					"Type (1 médicament, 2 examen, 3 kinésithérapie) : "
 				)
-				consultation_service.add_prescription(consultation_index, prescription)
+				prescription = read_prescription(prescription_type)
+				consultation_service.add_prescription(consultation_number, prescription)
 			except InvalidConsultationStatusError as error:
 				print(f"Erreur : {error}")
 			else:
 				save_data(consultation_service)
 				print("Prescription ajoutée.")
 		elif choice == "9":
+			display_patient_consultations(consultation_service)
+		elif choice == "10":
 			break
 		else:
 			print("Choix invalide.")
